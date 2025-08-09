@@ -1,28 +1,42 @@
 🧩 Task 2: Prove Your Local RISC‑V Setup (Run, Disassemble, Decode)
+
 🎯Objective
 
     ✅ Run 4 RISC‑V C programs locally using the installed toolchain and spike pk
     ✅ Embed uniqueness via username, hostname, machine ID, and timestamps
     ✅ Disassemble and decode main section of each binary
     ✅ Decode RISC-V integer instructions manually
+    
 🧩 Task 2.1 - Set Up Unique Identity Variables
+
 🎯 Objective
+
 Set identity variables in the Linux host shell so that each build is uniquely tied to the system.
+
 ⚙️ Commands Used
+
    export U=$(id -un)
    export H=$(hostname -s)
    export M=$(cat /etc/machine-id | head -c 16)
    export T=$(date -u +%Y-%m-%dT%H:%M:%SZ)
    export E=$(date +%s)
+   
 ✅ Summary
    .Stored username, hostname, machine ID, UTC time, and epoch time as environment variables
    .These values are passed as #define macros to every program
+   
 🔴 Output
+
 <img width="778" height="158" alt="Screenshot from 2025-08-10 00-35-25" src="https://github.com/user-attachments/assets/7b689318-40a5-491b-bd37-8f8a963a6a2d" />
+
 🧩 Task 2.2 - Create Common Header unique.h
+
 🎯 Objective
+
 Create a reusable header for printing build/run metadata like user, host, machine ID, build time, etc.
+
 ⚙️ Common Header code
+
 #ifndef UNIQUE_H
 #define UNIQUE_H
 #include <stdio.h>
@@ -86,10 +100,13 @@ printf("===========================\n");
     Generates ProofID (compile-unique) and RunID (per-execution unique)
 
 🧩 Task 2.3 - Program 1: factorial.c
+
 🎯 Objective
 
 Run a recursive factorial calculation while embedding unique metadata
+
 ⚙ Factorial Code
+
 #include "unique.h"
 static unsigned long long fact(unsigned n){ return (n<2)?1ULL:n*fact(n-1); }
 int main(void){
@@ -98,26 +115,40 @@ unsigned n = 12;
 printf("n=%u, n!=%llu\n", n, fact(n));
 return 0;
 }
+
 ⚙ Compile Command
+
 riscv64-unknown-elf-gcc -O0 -g -march=rv64imac -mabi=lp64 \
 -DUSERNAME="\"$U\"" -DHOSTNAME="\"$H\"" -DMACHINE_ID="\"$M\"" \
 -DBUILD_UTC="\"$T\"" -DBUILD_EPOCH=$E \
 factorial.c -o factorial
-▶ Run
-spike pk ./factorial
-🔴 Output of spike
-<img width="463" height="277" alt="Screenshot from 2025-08-09 22-15-57" src="https://github.com/user-attachments/assets/7009863b-38eb-4015-876d-cec92e06af2c" />
-🧠 Assembly
 
-riscv64-unknown-elf-gcc -O0 -S factorial.c -o factorial.s
+▶ Run
+
+spike pk ./factorial
+
+🔴 Output of spike
+
+<img width="463" height="277" alt="Screenshot from 2025-08-09 22-15-57" src="https://github.com/user-attachments/assets/7009863b-38eb-4015-876d-cec92e06af2c" />
+
+🧠 Assembly
+ 
+ riscv64-unknown-elf-gcc -O0 -S factorial.c -o factorial.s
+
 🛠 Disassemble Main
+
 riscv64-unknown-elf-objdump -d ./factorial | sed -n '/<main>:/,/^$/p' | tee factorial_main_objdump.txt
 <img width="404" height="534" alt="Screenshot from 2025-08-09 00-33-19" src="https://github.com/user-attachments/assets/a866e7f0-483b-47ff-b781-1743e47f941d" />
 <img width="768" height="497" alt="Screenshot from 2025-08-09 00-38-20" src="https://github.com/user-attachments/assets/22198a8b-03d5-4383-b70e-4c46c949e8f0" />
+
 🧩 Task 2.4 - Program 2: max_array.c
+
 🎯 Objective
+
 Find the maximum in an array and print with proof header
+
 ⚙ Max Array Code
+
 #include "unique.h"
 int main(void){
 uniq_print_header("max_array");
@@ -128,16 +159,24 @@ printf("Array length=%d, Max=%d\n", n, max);
 return 0;
 }
 (Repeat same steps as Task 2.3 for compile, run, assembly, and disassembly)
+
 🔴 Output of spike
+
 <img width="463" height="277" alt="Screenshot from 2025-08-09 22-31-58" src="https://github.com/user-attachments/assets/4824d7e8-0445-4cde-a9c9-392c088e50a7" />
+
 🔴 Output
+
 <img width="405" height="493" alt="Screenshot from 2025-08-09 22-35-48" src="https://github.com/user-attachments/assets/6009ac27-5e4b-48ed-89d7-a711cc6a7c34" />
 <img width="804" height="679" alt="Screenshot from 2025-08-09 22-36-45" src="https://github.com/user-attachments/assets/2e3b476e-6904-4b76-a6bb-6e34cc85b920" />
+
 🧩 Task 2.5 - Program 3: bitops.c
+
 🎯 Objective
 
 Perform basic bitwise operations and show uniqueness
+
 ⚙ Bitops Code
+
 #include "unique.h"
 int main(void){
 uniq_print_header("bitops");
@@ -150,17 +189,23 @@ printf("y>>2=0x%08X\n", y>>2);
 return 0;
 }
 (Repeat same steps as Task 2.3)
+
 🔴 Output of spike
 <img width="360" height="351" alt="Screenshot from 2025-08-09 22-40-29" src="https://github.com/user-attachments/assets/77a9846c-1e7f-4009-a094-41a055c34f71" />
+
 🔴 Output
 <img width="1075" height="686" alt="Screenshot from 2025-08-09 22-47-59" src="https://github.com/user-attachments/assets/c1de174c-c18f-4b19-bab3-920d353b4295" />
 <img width="1075" height="686" alt="Screenshot from 2025-08-09 22-43-25" src="https://github.com/user-attachments/assets/240dabcd-ffbe-4bd8-acea-f3b10e2b8ccc" />
 <img width="1081" height="604" alt="Screenshot from 2025-08-09 22-48-18" src="https://github.com/user-attachments/assets/6e61c724-8eae-431f-aaad-fa8fcb92c6df" />
+
 🧩 Task 2.6 - Program 4: bubble_sort.c
+
 🎯 Objective
 
 Perform bubble sort and print sorted array with proof header
+
 ⚙ Bubble sort Code
+
 #include "unique.h"
 void bubble(int *a,int n){ for(int i=0;i<n-1;i++) for(int j=0;j<n-1-i;j++) if(a[j]>a[j
 +1]){int t=a[j];a[j]=a[j+1];a[j+1]=t;} }
@@ -172,13 +217,21 @@ printf("Sorted:"); for(int i=0;i<n;i++) printf(" %d",a[i]); puts("");
 return 0;
 }
 (Repeat same steps as Task 2.3)
+
 🔴 Output of spike
+
 <img width="523" height="297" alt="Screenshot from 2025-08-09 22-49-56" src="https://github.com/user-attachments/assets/5e2772c1-8fdb-43b5-af20-88af10db009a" />
+
 🔴 Output
+
 <img width="523" height="587" alt="Screenshot from 2025-08-09 22-50-48" src="https://github.com/user-attachments/assets/004957ee-b770-49dc-a8ca-2d74336539c8" />
+
 <img width="833" height="694" alt="Screenshot from 2025-08-09 22-51-40" src="https://github.com/user-attachments/assets/60a45c4e-76c0-4d03-aecb-d5ad231c1a19" />
+
 🧩 Task 2.7 - Instruction Decoding
+
 🎯 Objective
+
 Manually decode at least 5 RISC‑V integer instructions from .s or .objdump output. 
 The detailed instruction decoding for all programs can be found here:
 FACTORIAL
